@@ -1,0 +1,95 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  password      String
+  role          String    @default("user") // "user" or "admin"
+  phone         String?
+  address       String?
+  bio           String?
+  emailVerified Boolean   @default(false)
+  emailVerificationToken String?
+  emailVerificationExpires DateTime?
+  passwordResetToken String?
+  passwordResetExpires DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relations
+  donations     Donation[]
+  eventRegistrations EventRegistration[]
+}
+
+model Event {
+  id            String    @id @default(cuid())
+  title         String
+  description   String
+  eventType     String    // "charity", "spiritual", "community", "educational"
+  date          DateTime
+  location      String
+  imageUrl      String?
+  isActive      Boolean   @default(true)
+  maxParticipants Int?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relations
+  registrations EventRegistration[]
+}
+
+model EventRegistration {
+  id            String    @id @default(cuid())
+  userId        String
+  eventId       String
+  status        String    @default("registered") // "registered", "attended", "cancelled"
+  notes         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event         Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, eventId])
+}
+
+model Donation {
+  id            String    @id @default(cuid())
+  userId        String
+  amount        Float
+  type          String    // "charity", "event", "general"
+  description   String?
+  status        String    @default("pending") // "pending", "completed", "failed"
+  paymentMethod String?   // "mpesa", "manual", null
+  mpesaCheckoutRequestID String? // Store M-Pesa checkout request ID to prevent duplicates
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model News {
+  id            String    @id @default(cuid())
+  title         String
+  content       String
+  excerpt       String?
+  category      String    // "charity", "spiritual", "community", "educational", "announcement"
+  imageUrl      String?
+  isPublished   Boolean   @default(false)
+  authorId      String?   // Optional: link to admin user who created it
+  publishedAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
