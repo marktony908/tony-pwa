@@ -1,13 +1,15 @@
-'use client'
+"use client"
 
 import { SessionProvider } from 'next-auth/react'
 import { Toaster } from 'react-hot-toast'
+import ServiceWorkerRegister from './components/ServiceWorkerRegister'
+import PWAInstallPrompt from './components/PWAInstallPrompt'
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <SessionProvider>
       {children}
-      <Toaster 
+      <Toaster
         position="top-right"
         toastOptions={{
           duration: 4000,
@@ -28,8 +30,13 @@ export function Providers({ children }: { children: React.ReactNode }) {
           },
         }}
       />
+      <ServiceWorkerRegister />
+      <PWAInstallPrompt />
     </SessionProvider>
   )
 }
+
+
+
 
 
